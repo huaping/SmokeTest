@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SmokeTest" default="help">
+    <property file="local.properties" />
+    <property file="ant.properties" />
+    <property environment="env" />
+    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
+        <isset property="env.ANDROID_HOME" />
+    </condition>
+    <loadproperties srcFile="project.properties" />
+    <fail
+            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable."
+            unless="sdk.dir"
+    />
+    <import file="custom_rules.xml" optional="true" />
+
+
+    <!-- version-tag: VERSION_TAG -->
+    <import file="${sdk.dir}/tools/ant/uibuild.xml" />
+    <target name="compile" depends="-build-setup, -pre-compile">
+        <javac encoding="${java.encoding}"
+                source="${java.source}" target="${java.target}"
+                debug="true" extdirs="" includeantruntime="false"
+                destdir="${out.classes.absolute.dir}"
+                bootclasspathref="project.target.class.path"
+                classpathref="reflibrary"
+                verbose="${verbose}"
+                fork="${need.javac.fork}">
+            <src path="${source.absolute.dir}" />
+            <compilerarg line="${java.compilerargs}" />
+        </javac>
+    </target>
+
+    <path id="reflibrary">
+        <fileset dir="libs">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <target name="-dex" depends="compile, -post-compile">
+        <dex executable="${dx}"
+                output="${intermediate.dex.file}"
+                nolocals="@{nolocals}"
+                verbose="${verbose}">
+            <path path="${out.classes.absolute.dir}"/>
+            <fileset dir="libs" includes="*.jar" erroronmissingdir="false"/>
+        </dex>
+    </target>
+
+    <target name="test" description="Runs tests">
+
+         <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="uiautomator" />
+            <arg value="runtest" />
+            <arg value="${out.filename}" />
+            <arg value="-e" />
+            <arg value="class" />
+            <arg value="com.cloudminds.teminal.smoke.SmokeTest#testBrowser" />
+        </exec>
+    </target>
+
+    <target name="prepare" depends="clean,build,install,test"></target>
+</project>
