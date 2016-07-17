@@ -47,7 +47,6 @@
     </target>
 
     <target name="test" description="Runs tests">
-
          <exec executable="${adb}" failonerror="true">
             <arg line="${adb.device.arg}" />
             <arg value="shell" />
@@ -55,8 +54,11 @@
             <arg value="runtest" />
             <arg value="${out.filename}" />
             <arg value="-e" />
+            <arg value="retryTimes" />
+            <arg value="1" />
+            <arg value="-e" />
             <arg value="class" />
-            <arg value="com.cloudminds.teminal.smoke.SmokeTest#testBrowser" />
+            <arg value="com.cloudminds.teminal.smoke.SmokeTest#testTakescreen" />
         </exec>
     </target>
 
