@@ -8,7 +8,9 @@ import com.android.uiautomator.core.UiObjectNotFoundException;
 import com.android.uiautomator.core.UiSelector;
 import com.cloudminds.teminal.modules.CameraModule;
 import com.cloudminds.teminal.modules.CommonModule;
+import com.cloudminds.teminal.modules.MessagingModule;
 import com.cloudminds.teminal.modules.SettingsModule;
+import com.cloudminds.teminal.modules.SwitchWorkspaceModule;
 import com.uiautomation.framework.UiAutoTestCase;
 
 public class SmokeTest extends UiAutoTestCase {
@@ -16,6 +18,9 @@ public class SmokeTest extends UiAutoTestCase {
 	CommonModule common = new CommonModule(this);
 	SettingsModule settings = new SettingsModule(this);
 	CameraModule camera = new CameraModule(this);
+	MessagingModule msg = new MessagingModule(this);
+	SwitchWorkspaceModule  workspace = new SwitchWorkspaceModule(this);
+	
 	UiSelector[] watchers = {
 			new UiSelector().textContains("Do you want to close it"),
 			new UiSelector().textContains("Unfortunately,"),
@@ -27,11 +32,13 @@ public class SmokeTest extends UiAutoTestCase {
 		registerClickUiObjectWatcher("crash_watchers", watchers,
 				new UiSelector().resourceId("android:id/button1"));
 		runWatchers();
+		freezeRotation(true);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		removeWatcher("crash_watchers");
+		common.gotoHome();
 		super.tearDown();
 	}
 
@@ -120,4 +127,26 @@ public class SmokeTest extends UiAutoTestCase {
 	public void testTakescreen(){
 		fail();
 	}
+	
+	public void testSendSMS(){
+		msg.openMessageApp();
+		msg.createNewSMS("10086", "CXYE");
+		assertEquals("no reply recieved", true, msg.checkMsgContent("账户余额", 8000));
+	}
+	
+	public void testDeleteMessage(){
+		common.gotoHome();
+		msg.openMessageApp();
+		assertEquals("Delete failed", true, msg.deleteMsgConversationByPhoneNum( "10086"));
+	}
+	public void testSendMMS(){
+		msg.openMessageApp();
+		assertEquals("Send mms failed", true, msg.createMMS("10086", "CXYE"));
+	}
+	
+	public void testSwitchWorkspace(){
+		assertEquals("Swich workspace failed", true, workspace.setWorkspace(SwitchWorkspaceModule.PERSONAL_HOME));
+	}
 }
+
+
