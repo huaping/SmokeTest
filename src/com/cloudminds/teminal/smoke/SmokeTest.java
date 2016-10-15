@@ -7,7 +7,9 @@ import android.os.RemoteException;
 import com.android.uiautomator.core.UiObjectNotFoundException;
 import com.android.uiautomator.core.UiSelector;
 import com.cloudminds.teminal.modules.CameraModule;
+import com.cloudminds.teminal.modules.ChromeModule;
 import com.cloudminds.teminal.modules.CommonModule;
+import com.cloudminds.teminal.modules.GMSModule;
 import com.cloudminds.teminal.modules.MessagingModule;
 import com.cloudminds.teminal.modules.SettingsModule;
 import com.cloudminds.teminal.modules.SwitchWorkspaceModule;
@@ -20,12 +22,17 @@ public class SmokeTest extends UiAutoTestCase {
 	CameraModule camera = new CameraModule(this);
 	MessagingModule msg = new MessagingModule(this);
 	SwitchWorkspaceModule  workspace = new SwitchWorkspaceModule(this);
+	ChromeModule chrome = new ChromeModule(this);
+	GMSModule gms= new GMSModule(this);
 	
 	UiSelector[] watchers = {
 			new UiSelector().textContains("Do you want to close it"),
 			new UiSelector().textContains("Unfortunately,"),
 			new UiSelector().textContains("has stopped") };
 
+	public SmokeTest(){
+		super(6000, "SMOKE TEST", true);
+	}
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -33,6 +40,7 @@ public class SmokeTest extends UiAutoTestCase {
 				new UiSelector().resourceId("android:id/button1"));
 		runWatchers();
 		freezeRotation(true);
+		
 	}
 
 	@Override
@@ -120,7 +128,6 @@ public class SmokeTest extends UiAutoTestCase {
 				camera.shutle(0);
 				sleep(1000);
 			}
-			
 		}
 	}
 
@@ -147,6 +154,59 @@ public class SmokeTest extends UiAutoTestCase {
 	public void testSwitchWorkspace(){
 		assertEquals("Swich workspace failed", true, workspace.setWorkspace(SwitchWorkspaceModule.PERSONAL_HOME));
 	}
+	
+	public void testBrowser() throws RemoteException, UiObjectNotFoundException{
+		chrome.openBrowserApp();
+		chrome.clearPrivacy();
+		chrome.openUrl("swverification.blog.sohu.com", "swverification.blog.sohu.com");
+		chrome.webBrowsingControl();
+		
+		String[] linkStrings = { "UI Testing - uiautomator:uiautomator 是android提供的一个UI测试工具，跟Monkeyrunner不同",
+				"Test Automation tools for android:NativeDriver",
+				"Selenium - A web based test tool:create quick bug reproduction scripts"
+			};
+		
+		for (int i = 0; i < linkStrings.length; i++) {
+			String link = linkStrings[i].split(":")[0];
+			for(String verify : linkStrings[i].split(":")[1].split(","))
+			{
+				System.out.println("current Link:"+link+" Verify::"+verify);
+				boolean rst = chrome.webClickAndVerify(link, verify);
+				chrome.webBrowsingControl();
+				pressKey("back");
+				if (!rst)logMessage("Open Link: " + link + "   verify:" + verify);
+				sleep(1000);
+			}
+		}
+	}
+	
+	public void testGoogleSearch() {
+		gms.googleSearchWidget("hello google", "Hello Google - YouTube");
+		
+		String[] linkStrings = { "hello google:Hello Google - YouTube",
+				"microsoft:Microsoft - Official Home Page",
+				"facebook:Facebook"
+			};
+		
+		for (int i = 0; i < linkStrings.length; i++) {
+			String link = linkStrings[i].split(":")[0];
+			for(String verify : linkStrings[i].split(":")[1].split(","))
+			{
+				logMessage("current Link:"+link+" Verify::"+verify);
+				if (gms.googleSearchWidget(link, verify)){
+					 chrome.webClickAndVerify(verify, "");
+					chrome.webBrowsingControl();
+				}
+				try {
+					pressKey("home");
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+				sleep(1000);
+			}
+		}
+	}
+	
 }
 
 
