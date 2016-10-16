@@ -6,6 +6,7 @@ import android.os.RemoteException;
 
 import com.android.uiautomator.core.UiObjectNotFoundException;
 import com.android.uiautomator.core.UiSelector;
+import com.cloudminds.teminal.modules.CallModule;
 import com.cloudminds.teminal.modules.CameraModule;
 import com.cloudminds.teminal.modules.ChromeModule;
 import com.cloudminds.teminal.modules.CommonModule;
@@ -24,6 +25,7 @@ public class SmokeTest extends UiAutoTestCase {
 	SwitchWorkspaceModule  workspace = new SwitchWorkspaceModule(this);
 	ChromeModule chrome = new ChromeModule(this);
 	GMSModule gms= new GMSModule(this);
+	CallModule call = new CallModule(this);
 	
 	UiSelector[] watchers = {
 			new UiSelector().textContains("Do you want to close it"),
@@ -206,7 +208,10 @@ public class SmokeTest extends UiAutoTestCase {
 			}
 		}
 	}
-	
+
+	public void testCallStatus(){
+		assertEquals("dial 10086 failed", true, call.dialNumer("10086"));
+	}
 }
 
 

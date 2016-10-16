@@ -58,7 +58,7 @@
             <arg value="1" />
             <arg value="-e" />
             <arg value="class" />
-            <arg value="com.cloudminds.teminal.smoke.SmokeTest#testGoogleSearch" />
+            <arg value="com.cloudminds.teminal.smoke.SmokeTest#testCallStatus" />
         </exec>
     </target>
 
